@@ -46,7 +46,6 @@ gulp.task('commit', ['lint', 'add-files', 'add-tests', 'test'], () => {
       message: 'Please enter commit message...',
     }, (res) => {
       if (res.commit && res.commit !== '') {
-        console.log('Message: ', res.commit);
         gulp.src(['!node_modules/**', '!node_modules', '!.idea', '**/*'])
           .pipe(git.commit(res.commit));
       } else {
@@ -65,17 +64,4 @@ gulp.task('push develop', ['lint', 'test'], () => {
   git.push('origin', 'develop', (err) => {
     if (err) throw err;
   });
-});
-
-gulp.task('test-prompt', () => {
-  gulp.src('package.json')
-    .pipe(prompt.prompt({
-      type: 'checkbox',
-      name: 'bump',
-      message: 'What type of bump would you like to do?',
-      choices: ['patch', 'minor', 'major'],
-    }, (res) => {
-      // value is in res.bump (as an array)
-      console.log(res.bump);
-    }));
 });
