@@ -1,6 +1,9 @@
+/* eslint strict: "off" */
+'use strict';
 const gulp = require('gulp');
 const eslint = require('gulp-eslint');
 const git = require('gulp-git');
+const prompt = require('gulp-prompt');
 const jest = require('jest-cli');
 
 const jestConfig = {
@@ -34,10 +37,23 @@ gulp.task('tdd', (done) => {
     './models/**/*.js', './routes/**/*.js', './__tests__/**/*.js'], ['test']);
 });
 
-gulp.task('commit', ['lint', 'add-files', 'add-tests', 'test'], () =>
-  gulp.src(['!node_modules/**', '!node_modules', '!.idea', '**/*'])
-    .pipe(git.commit('Added push task to gulp'))
-);
+gulp.task('commit', ['lint', 'add-files', 'add-tests', 'test'], () => {
+  let message;
+  return gulp.src(['!node_modules/**', '!node_modules', '!.idea', '**/*'])
+    .pipe(prompt.prompt({
+      type: 'input',
+      name: 'commit',
+      message: 'Please enter commit message...',
+    }, (res) => {
+      if (res.commit && res.commit !== '') {
+        console.log('Message: ', res.commit);
+        gulp.src(['!node_modules/**', '!node_modules', '!.idea', '**/*'])
+          .pipe(git.commit(res.commit));
+      } else {
+        throw Error('A message should be entered');
+      }
+    }));
+});
 
 gulp.task('push master', ['lint', 'test'], () => {
   git.push('origin', 'master', (err) => {
@@ -49,4 +65,17 @@ gulp.task('push develop', ['lint', 'test'], () => {
   git.push('origin', 'develop', (err) => {
     if (err) throw err;
   });
+});
+
+gulp.task('test-prompt', () => {
+  gulp.src('package.json')
+    .pipe(prompt.prompt({
+      type: 'checkbox',
+      name: 'bump',
+      message: 'What type of bump would you like to do?',
+      choices: ['patch', 'minor', 'major'],
+    }, (res) => {
+      // value is in res.bump (as an array)
+      console.log(res.bump);
+    }));
 });
