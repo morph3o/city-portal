@@ -36,5 +36,17 @@ gulp.task('tdd', (done) => {
 
 gulp.task('commit', ['lint', 'add-files', 'add-tests', 'test'], () =>
   gulp.src(['!node_modules/**', '!node_modules', '!.idea', '**/*'])
-    .pipe(git.commit('Added tdd task to gulp'))
+    .pipe(git.commit('Added push task to gulp'))
 );
+
+gulp.task('push master', ['lint', 'test'], () => {
+  git.push('origin', 'master', (err) => {
+    if (err) throw err;
+  });
+});
+
+gulp.task('push develop', ['lint', 'test'], () => {
+  git.push('origin', 'develop', (err) => {
+    if (err) throw err;
+  });
+});
